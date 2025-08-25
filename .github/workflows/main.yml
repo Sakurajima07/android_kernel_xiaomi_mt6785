@@ -40,12 +40,15 @@ jobs:
           sudo ln -sf /usr/bin/ld.lld /usr/bin/ld || true
           echo "VERSION=$(grep -E '^VERSION|^PATCHLEVEL|^SUBLEVEL' Makefile | awk '{print $3}' | paste -sd. - | sed 's/\.\(-.*\)/\1/')" >> $GITHUB_ENV
 
+      - name: Init submodules
+        run: git submodule update --init --recursive
+
       - name: Notify start on Telegram
         run: |
           curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
             -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
             --data-urlencode "text=☢️ *Kernel Build Started!*
-            *Device:* blossom
+            *Device:* rosemary
             *Arch:* arm64
             *Defconfig:* $DEFCONFIG
             *Kernel Version:* $VERSION
