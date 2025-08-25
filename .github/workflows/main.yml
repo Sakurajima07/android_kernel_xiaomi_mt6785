@@ -100,26 +100,12 @@ jobs:
           echo -e "\n### 🧠 CCACHE Stats:\n" >> build.log
           ccache --show-stats >> build.log
 
-      - name: Zip kernel modules
-        if: success()
-        run: |
-          find out -name '*.ko' > module_list.txt
-          zip -@ out/kernel-modules.zip < module_list.txt
-
       - name: Upload kernel image as artifact
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: kernel-${{ env.ZIP_NAME }}-${{ github.run_number }}
           path: out/arch/arm64/boot/Image.gz-dtb
-          retention-days: 14
-
-      - name: Upload modiles zip as artifact
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: modules-${{ env.ZIP_NAME }}-${{ github.run_number }}
-          path: out/kernel-modules.zip
           retention-days: 14
 
       - name: Upload build log as artifact
@@ -129,13 +115,6 @@ jobs:
           name: build-log-${{ github.run_number }}
           path: build.log
           retention-days: 14
-
-      - name: Send build artifacts to Telegram
-        if: success()
-        run: |
-          curl -s -F document=@out/kernel-modules.zip \
-            "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument?chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -F caption="Kernel Modules ZIP"
 
       - name: Notify success on Telegram
         if: success()
@@ -165,3 +144,4 @@ jobs:
           curl -s -F document=@build.log \
             "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument?chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" \
             -F caption="📄 Kernel build log"
+
